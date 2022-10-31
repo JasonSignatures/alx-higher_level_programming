@@ -1,85 +1,160 @@
 #!/usr/bin/python3
-""" doctest unittest """
-from models.base import Base
-from models.rectangle import Rectangle
-from models.square import Square
+"""Module for Base class tests"""
 import unittest
-import json
-import pep8
+from models.base import Base
+from models.square import Square
+from models.rectangle import Rectangle
+from io import StringIO
+from unittest.mock import patch
 
 
-class Testpep8(unittest.TestCase):
-    def test_pep8(self):
-        style = pep8.StyleGuide(quiet=True)
-        file_rectagle = "models/rectangle.py"
-        file_rectabgle_test = "tests/test_models/test_rectangle.py"
-        file_base = "models/base.py"
-        file_base_test = "tests/test_models/test_base.py"
-        file_square = "models/square.py"
-        file_square_test = "tests/test_models/test_square.py"
-        check = style.check_files([file_rectagle, file_rectabgle_test,
-                                  file_base, file_base_test, file_square,
-                                  file_square_test])
-        self.assertEqual(check.total_errors, 0,
-                         "Found code style errors (and warning).")
+class TestBaseMethods(unittest.TestCase):
+    """To test Base class"""
 
+    def setUp(self) -> None:
+        Base._Base__nb_objects = 0def test_id_nb_objects(self):
+        """ Test nb object attribute """
+        new = Base()
+        new2 = Base()
+        new3 = Base()
+        self.assertEqual(new.id, 1)
+        self.assertEqual(new2.id, 2)
+        self.assertEqual(new3.id, 3)
 
-class TestBase(unittest.TestCase):
-    """ test """
+    def test_id_mix(self):
+        """ Test nb object attributes and assigned id """
+        new = Base()
+        new2 = Base(1024)
+        new3 = Base()
+        self.assertEqual(new.id, 1)
+        self.assertEqual(new2.id, 1024)
+        self.assertEqual(new3.id, 2)
 
-    @classmethod
-    def setUpClass(cls):
-        pass
+    def test_string_id(self):
+        """ Test string id """
+        new = Base('1')
+        self.assertEqual(new.id, '1')
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
+    def test_more_args_id(self):
+        """ Test passing more args to init method """
+        with self.assertRaises(TypeError):
+            new = Base(1, 1)
 
-    def setUp(self):
-        self.b1 = Base()
-        self.b2 = Base()
-        self.b3 = Base(-1)
-        self.b4 = Base(12)
-        self.b5 = Base("hola")
-        self.b6 = Base(3.1)
-        self.b7 = Base()
+    def test_access_private_attrs(self):
+        """ Test accessing to private attributes """
+        new = Base()
+        with self.assertRaises(AttributeError):
+            new.__nb_objects
 
-    def tearDown(self):
-        pass
+    def test_save_to_file_1(self):
+        """ Test JSON file """
+        Square.save_to_file(None)
+        res = "[]\n"
+        with open("Square.json", "r") as file:
+            with patch('sys.stdout', new=StringIO()) as str_out:
+                print(file.read())
+                self.assertEqual(str_out.getvalue(), res)
 
-    def test_setid(self):
-        self.assertEqual(self.b1.id, 7)
+        try:
+            os.remove("Square.json")
+        except:
+            pass
 
-    def test_setid2(self):
-        self.assertEqual(self.b2.id, 11)
+        Square.save_to_file([])
+        with open("Square.json", "r") as file:
+            self.assertEqual(file.read(), "[]")
 
-    def test_setid3(self):
-        self.assertEqual(self.b3.id, -1)
+    def test_save_to_file_2(self):
+        """ Test JSON file """
+        Rectangle.save_to_file(None)
+        res = "[]\n"
+        with open("Rectangle.json", "r") as file:
+            with patch('sys.stdout', new=StringIO()) as str_out:
+                print(file.read())
+                self.assertEqual(str_out.getvalue(), res)
+        try:
+            os.remove("Rectangle.json")
+        except:
+            pass
 
-    def test_setid4(self):
-        self.assertEqual(self.b4.id, 12)
+        Rectangle.save_to_file([])
+        with open("Rectangle.json", "r") as file:
+            self.assertEqual(file.read(), "[]")
 
-    def test_setid5(self):
-        self.assertEqual(self.b5.id, "hola")
+    def test_id(self):
+        val1 = Base(21)
+        val2 = Base()
+        val3 = Base()
+        val4 = Base()
+        self.assertEqual(val1.id, 21)
+        self.assertEqual(val3.id, val4.id - 1)
+        self.assertEqual(val2.id, 1)
 
-    def test_setid6(self):
-        self.assertEqual(self.b6.id, 3.1)
+    def test_id_nb_objects(self):
+        """ Test nb object attribute """
+        new = Base()
+        new2 = Base()
+        new3 = Base()
+        self.assertEqual(new.id, 1)
+        self.assertEqual(new2.id, 2)
+        self.assertEqual(new3.id, 3)
 
-    def test_setid7(self):
-        self.assertEqual(self.b7.id, 27)
+    def test_id_mix(self):
+        """ Test nb object attributes and assigned id """
+        new = Base()
+        new2 = Base(1024)
+        new3 = Base()
+        self.assertEqual(new.id, 1)
+        self.assertEqual(new2.id, 1024)
+        self.assertEqual(new3.id, 2)
 
-    def test_json_string(self):
-        r1 = Rectangle(10, 7, 2, 8, 1)
-        dictionary = r1.to_dictionary()
-        json_dictionary = Base.to_json_string([dictionary])
-        self.assertEqual(type(json_dictionary), str)
+    def test_string_id(self):
+        """ Test string id """
+        new = Base('1')
+        self.assertEqual(new.id, '1')
 
-    def test_json_string2(self):
-        r1 = Rectangle(10, 7, 2, 8, 1)
-        dictionary = r1.to_dictionary()
-        json_dictionary = Base.to_json_string([dictionary])
-        list_back = json.loads(json_dictionary)
-        self.assertEqual(list_back, [dictionary])
+    def test_more_args_id(self):
+        """ Test passing more args to init method """
+        with self.assertRaises(TypeError):
+            new = Base(1, 1)
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_access_private_attrs(self):
+        """ Test accessing to private attributes """
+        new = Base()
+        with self.assertRaises(AttributeError):
+            new.__nb_objects
+
+    def test_save_to_file_1(self):
+        """ Test JSON file """
+        Square.save_to_file(None)
+        res = "[]\n"
+        with open("Square.json", "r") as file:
+            with patch('sys.stdout', new=StringIO()) as str_out:
+                print(file.read())
+                self.assertEqual(str_out.getvalue(), res)
+
+        try:
+            os.remove("Square.json")
+        except:
+            pass
+
+        Square.save_to_file([])
+        with open("Square.json", "r") as file:
+            self.assertEqual(file.read(), "[]")
+
+    def test_save_to_file_2(self):
+        """ Test JSON file """
+        Rectangle.save_to_file(None)
+        res = "[]\n"
+        with open("Rectangle.json", "r") as file:
+            with patch('sys.stdout', new=StringIO()) as str_out:
+                print(file.read())
+                self.assertEqual(str_out.getvalue(), res)
+        try:
+            os.remove("Rectangle.json")
+        except:
+            pass
+
+        Rectangle.save_to_file([])
+        with open("Rectangle.json", "r") as file:
+            self.assertEqual(file.read(), "[]")
